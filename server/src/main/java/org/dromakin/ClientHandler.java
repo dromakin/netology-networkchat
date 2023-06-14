@@ -26,20 +26,21 @@ import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 
 public class ClientHandler extends Thread {
 
     private static final Logger logger = LogManager.getLogger(Server.class);
 
-    private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     private static final String COMMAND_CLIENT_START = "/";
     private static final String COMMAND_CLIENT_CONFIGURATION = COMMAND_CLIENT_START + "client";
-    private static final String COMMAND_CLIENT_MENU = COMMAND_CLIENT_START + "menu";
-    private static final String COMMAND_SERVER_EXIT = COMMAND_CLIENT_START + "exit";
+    private static final String COMMAND_CLIENT_STOP = COMMAND_CLIENT_START + "stop";
     private static final String COMMAND_CLIENT_CONFIGURATION_SPLITTER = " ";
     private static final String MSG_CLIENT_JSON_START = "{";
     private static final String MSG_OK = "OK";
+    private static final String MSG_ON_START = "For start send \"/client {JSON with Client data}";
+    private static final String MSG_CLIENT_CONNECTION_ERROR_LIMITED = "Limited number of chat participants! Please contact to support!";
+    private static final String MSG_CLIENT_CONNECTION_ERROR_CLIENT_INFO = "Client information didn't fill correctly!";
+    private static final String MSG_CLIENT_END = "\n";
     private final Socket clientSocket;
     private final ChatController chatController;
     private final int countMembers;
@@ -63,6 +64,7 @@ public class ClientHandler extends Thread {
         try {
             this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             this.out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+            sendOnStart(MSG_ON_START);
 
             while (true) {
                 text = in.readLine();
@@ -73,9 +75,7 @@ public class ClientHandler extends Thread {
                     break;
                 }
 
-                if (text.startsWith("/")) {
-                    processMessage(text);
-                }
+                processMessage(text);
             }
 
         } catch (SocketException e) {
@@ -91,16 +91,36 @@ public class ClientHandler extends Thread {
                 ex.printStackTrace();
         }
 
-        logger.info("Поток пользователя [{}] закончил работу", clientInfo.getNickname());
+        logger.info("Thread user @{} finished!", clientInfo.getNickname());
+    }
+
+
+    private void sendOnStart(String msg) throws ClientHandlerException {
+        try {
+            out.write(msg + MSG_CLIENT_END);
+            out.flush();
+        } catch (IOException e) {
+            String msgErr = "Unregistered client socket has been closed!";
+            logger.error(msgErr, e);
+            throw new ClientHandlerException(msgErr, e);
+        }
     }
 
     private void send(String msg, String nickname) throws ClientHandlerException {
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         try {
-            out.write(String.format("%s %s", nickname, msg));
+            ObjectMapper objectMapper = new ObjectMapper();
+            String jsonStr = objectMapper.writeValueAsString(
+                    ClientMessage.builder()
+                            .nickname(nickname)
+                            .message(msg)
+                            .time(timestamp.getTime())
+                            .build()
+            );
+            out.write(jsonStr + MSG_CLIENT_END);
             out.flush();
         } catch (IOException e) {
-            String msgErr = String.format("Client socket [%s] has been closed!", nickname);
+            String msgErr = String.format("Client socket @%s has been closed!", nickname);
             logger.error(msgErr, e);
             throw new ClientHandlerException(msgErr, e);
         }
@@ -118,7 +138,7 @@ public class ClientHandler extends Thread {
         try {
             this.clientSocket.close();
             this.chatController.getChatClients().getActiveClients().remove(clientInfo.getNickname());
-            logger.info("Thread client [{}] finished!", clientInfo.getNickname());
+            logger.info("Thread client @{} finished!", clientInfo.getNickname());
         } catch (IOException e) {
             String msgErr = String.format("Error while closing client's socket [%s]!", clientInfo.getNickname());
             logger.error(msgErr, e);
@@ -165,14 +185,13 @@ public class ClientHandler extends Thread {
 
                         // check count members
                         if (countMembers >= ChatController.MAX_CHAT_MEMBERS) {
-                            sendClient("Limited number of chat participants! Please contact to support!");
-                            // stop this client
+                            sendClient(MSG_CLIENT_CONNECTION_ERROR_LIMITED);
                             close();
                         }
 
                         // registration
                         if (this.clientInfo.getNickname() == null) {
-                            sendClient("Client information didn't fill correctly!");
+                            sendClient(MSG_CLIENT_CONNECTION_ERROR_CLIENT_INFO);
                             close();
                         } else {
                             this.chatController.registrationClient(this);
@@ -185,7 +204,7 @@ public class ClientHandler extends Thread {
                         // optional: check user if auth server now it
                         // yes - Welcome back!
                         // no - Welcome!
-                        this.chatController.sendSystemMessage(String.format("A new user [%s] has joined our chat!", this.clientInfo.getNickname()));
+                        this.chatController.sendSystemMessage(String.format("User @%s has joined our chat!", this.clientInfo.getNickname()));
 
                         // update atomic values - count members
                         this.chatController.incrementCountMembers();
@@ -200,16 +219,10 @@ public class ClientHandler extends Thread {
 
         }
 
-        if (message.equals(COMMAND_CLIENT_MENU)) {
+        if (message.equals(COMMAND_CLIENT_STOP)) {
             // close client
-            sendClient("Close connection and go to main menu:");
-            this.chatController.sendSystemMessage(String.format("User [%s] left the chat!", this.clientInfo.getNickname()));
+            this.chatController.sendSystemMessage(String.format("User @%s left the chat!", this.clientInfo.getNickname()));
             close();
-        }
-
-        if (message.equals(COMMAND_SERVER_EXIT)) {
-            // close clients
-            this.chatController.stopChat();
         }
     }
 

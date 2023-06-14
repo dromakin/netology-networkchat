@@ -19,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import org.dromakin.exceptions.ClientHandlerException;
 
 import java.net.Socket;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -85,9 +86,11 @@ public class ChatController {
         String msgWarning = String.format("%s: Get command to close chat! Start processing...", SYSTEM_MSG_START);
         logger.debug(msgWarning);
         logger.info(msgWarning);
-        for (ClientHandler c : chatClients.getActiveClients().values()) {
-            c.close();
-            logger.debug("Client @{} disconnected!", c.getClientInfo().getNickname());
+        if (!chatClients.getActiveClients().isEmpty()) {
+            for (ClientHandler c : chatClients.getActiveClients().values()) {
+                c.close();
+                logger.debug("Client @{} disconnected!", c.getClientInfo().getNickname());
+            }
         }
         connectionHandler.interrupt();
         logger.info("Server finished!");

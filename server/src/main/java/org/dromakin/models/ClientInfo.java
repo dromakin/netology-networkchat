@@ -21,8 +21,6 @@ import lombok.*;
 @Getter(AccessLevel.PUBLIC)
 public class ClientInfo {
     String nickname;
-    String email;
     String name;
     String surname;
-    String adminToken;
 }

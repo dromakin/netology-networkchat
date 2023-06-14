@@ -121,6 +121,10 @@ public class Server {
                         break;
 
                 }
+
+                if (exit) {
+                    break;
+                }
             }
 
         } catch (ServerException e) {
@@ -130,6 +134,8 @@ public class Server {
             logger.error(e.getMessage(), e);
             e.print();
         }
+
+        System.exit(0);
     }
 
     protected static void printMenu() {
@@ -138,9 +144,10 @@ public class Server {
                 .append("Welcome to server menu!").append("\n")
                 .append("Server CLI commands:").append("\n")
                 .append("/start - start server").append("\n")
+                .append("/restart - restart server").append("\n")
                 .append("/stop - stop server").append("\n")
                 .append("/exit - stop server and close menu").append("\n")
-                .append("/stat - print statistic from server").append("\n");
+                .append("/stat - print statistic from server");
 
         logger.info(stringBuilder);
     }
@@ -150,7 +157,7 @@ public class Server {
         stringBuilder
                 .append("Server statistic:").append("\n")
                 .append("Messages count: ").append(countMsgs).append("\n")
-                .append(countClients).append(" active users out of ").append(maxClients).append("\n");
+                .append(countClients).append(" active users out of ").append(maxClients);
 
         logger.info(stringBuilder);
     }
