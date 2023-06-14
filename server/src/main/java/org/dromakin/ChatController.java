@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Logger;
 import org.dromakin.exceptions.ClientHandlerException;
 
 import java.net.Socket;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 

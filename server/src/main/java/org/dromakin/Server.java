@@ -56,7 +56,7 @@ public class Server {
         return Paths.get(url.getFile());
     }
 
-    private void loadSettings() throws ServerException {
+    public void loadSettings() throws ServerException {
         try (InputStream input = Files.newInputStream(this.pathToPropertyFile)) {
             Properties prop = new Properties();
 
