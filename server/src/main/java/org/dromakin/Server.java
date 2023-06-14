@@ -144,7 +144,6 @@ public class Server {
                 .append("Welcome to server menu!").append("\n")
                 .append("Server CLI commands:").append("\n")
                 .append("/start - start server").append("\n")
-                .append("/restart - restart server").append("\n")
                 .append("/stop - stop server").append("\n")
                 .append("/exit - stop server and close menu").append("\n")
                 .append("/stat - print statistic from server");
