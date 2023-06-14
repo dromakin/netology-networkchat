@@ -13,13 +13,13 @@
 
 package org.dromakin.exceptions;
 
-public class ClientException extends Exception {
+public class ChatMessageViewerException extends Exception {
 
-    public ClientException(String s) {
+    public ChatMessageViewerException(String s) {
         super(s);
     }
 
-    public ClientException(String s, Throwable throwable) {
+    public ChatMessageViewerException(String s, Throwable throwable) {
         super(s, throwable);
     }
 
@@ -28,5 +28,4 @@ public class ClientException extends Exception {
         if (getCause() != null)
             getCause().printStackTrace();
     }
-
 }
