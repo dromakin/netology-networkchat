@@ -190,6 +190,16 @@ Messages count: 9
 Process finished with exit code 0
 ```
 
+Логи клиента 1:
+[client_1_multithread_example.log](logs%2Fclient_1_multithread_example.log)
+
+Логи клиента 2:
+[client_2_multithread_example.log](logs%2Fclient_2_multithread_example.log)
+
+Логи сервера:
+[server_multithread_example.log](logs%2Fserver_multithread_example.log)
+
+
 9. Написать README.md к проекту;
 10. Отправить на проверку.
 
