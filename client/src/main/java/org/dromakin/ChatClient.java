@@ -98,9 +98,9 @@ public class ChatClient {
         try {
             out.write(COMMAND_CLIENT_STOP + MSG_CLIENT_END);
             out.flush();
-            this.chatMessageReader.interrupt();
             Thread.sleep(WAIT_CHAT_CLOSE);
             socket.close();
+            this.chatMessageReader.interrupt();
         } catch (IOException e) {
             String msgErr = "Error while send close command to server!";
             logger.error(msgErr, e);
