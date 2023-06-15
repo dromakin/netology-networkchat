@@ -62,6 +62,12 @@
 
 ---
 
+Sequence Schema:
+
+![sequence_diagram.png](docs%2Fsequence_diagram.png)
+
+---
+
 3. Создать репозиторий проекта на github;
 4. Написать сервер;
 5. Провести интеграционный тест сервера, например с помощью telnet;
